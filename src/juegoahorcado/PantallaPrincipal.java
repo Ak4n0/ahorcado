@@ -206,9 +206,8 @@ public class PantallaPrincipal extends javax.swing.JFrame {
                 reiniciarJuego(true);
                 return;
             }
-            String aux = listaEnJuego[indiceActual];
+            
             listaEnJuego[indiceActual] = listaEnJuego[indiceFinal];
-            listaEnJuego[indiceFinal] = aux;
         }
         
         indiceActual = (int)(Math.random() * indiceFinal);
