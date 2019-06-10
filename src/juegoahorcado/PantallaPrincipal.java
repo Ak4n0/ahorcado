@@ -30,26 +30,39 @@ public class PantallaPrincipal extends javax.swing.JFrame {
                                  "la novia de frankenstein",
                                  "metropolis" };
     
+    // Lista de frases aleatorias que faltan por adivinar
     String[] listaEnJuego;
+    
+    // Índice que indica la frase de listaEnJuego con la que se está jugando
     int indiceActual;
+    
+    // Índice de la última película de la listaEnJuego válida
     int indiceFinal;
                                  
-    
+    // Contiene la frase que se va a buscar
     String textoOculto;
+    
+    // Contiene las letras que se han introducido en el juego actual
     String letrasIntroducidas;
+    
+    // Contiene la cadena oculta que va a ver el usuario.
     StringBuilder cadenaResultado;
     
+    // Número de errores del juego actual
     int fallos;
     
     /**
      * Creates new form PantallaPrincipal
      */
     public PantallaPrincipal() {
+        // Carga las imagenes a usar.
         for(int i = 0; i < 7; ++i) {
             imgIntentos[i] = new ImageIcon("imagenes/imagen" + (i+1) + ".gif");
         }
         
         initComponents();
+        
+        // Deja el juego listo para iniciarse
         reiniciarJuego(true);
     }
 
@@ -112,9 +125,9 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         panelInferior.setBackground(new java.awt.Color(255, 255, 255));
         panelInferior.setLayout(new java.awt.BorderLayout());
 
-        lblFraseOculta.setFont(new java.awt.Font("Tahoma", 2, 14)); // NOI18N
+        lblFraseOculta.setFont(new java.awt.Font("Arial", 2, 14)); // NOI18N
         lblFraseOculta.setHorizontalAlignment(javax.swing.SwingConstants.CENTER);
-        lblFraseOculta.setText("jLabel1");
+        lblFraseOculta.setText("F R A S E   O C U L T A");
         lblFraseOculta.setBorder(javax.swing.BorderFactory.createEmptyBorder(10, 10, 10, 10));
         panelInferior.add(lblFraseOculta, java.awt.BorderLayout.CENTER);
 
@@ -127,20 +140,18 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         char letra = evt.getKeyChar();
         letra = Character.toUpperCase(letra);
         
-        // Si el carácter recibido no es letra no se contabiliza
-        if(!Character.isLetter(letra))
+        // Si el carácter recibido no es letra o la letra ya ha sido introducida
+        // no se contabiliza
+        if(!Character.isLetter(letra) || letrasIntroducidas.indexOf(letra) != -1)
             return;
         
-        // Si el carácter ya ha sido introducido no se contabiliza
-        
-        if(letrasIntroducidas.indexOf(letra) != -1)
-            return;
-        
-        // No se ha introducido...
         // Añadirla a la lista de letras introducidas
         letrasIntroducidas += letra;
         lblInformacion.setText(lblInformacion.getText() + " " + letra);
         
+        // Se busca si la letra existe en textoOculto.
+        // En caso de existir se indica este hecho y se introduce en cadenaResultado
+        // y si no existe se indica que no lo hace
         boolean existeLetra = false;
         for(int i = 0; i < textoOculto.length(); ++i) {
             if(textoOculto.charAt(i) == letra) {
@@ -149,6 +160,7 @@ public class PantallaPrincipal extends javax.swing.JFrame {
             }
         }
         
+        // Comprueba si la letra existe y actua en consecuencia
         if(existeLetra) {
             actualizarLabelFraseOculta();
             comprobarSiGana();
@@ -192,12 +204,22 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         });
     }
 
+    /**
+     * Reinicia el juego para que se pueda jugar de nuevo.
+     * Depende del parámetro reinicioCompleto para que la partide quede en el estado inicial
+     * o solo se prepara para continuar con las frases faltantes de la lista.
+     * @param reinicioCompleto Si es true el juego vuelve al estado original, si els false el juego continua con las frases que faltan.
+     */
     private void reiniciarJuego(boolean reinicioCompleto) {
         if(reinicioCompleto) {
+            // listaEnJuego se carga con la lista original y el índice
+            // final marca el final de la lista
             listaEnJuego = titulosPelicula.clone();
             indiceFinal = listaEnJuego.length;
         }
         else {
+            // Se reduce el índiceFinal que si llega a 0 es que el jugador ha ganado y se le indica.
+            // El jugador podrá elegir si jugar de nuevo o cerrar el programa
             indiceFinal--;
             if(indiceFinal == 0) {
                 int opcion = JOptionPane.showOptionDialog(null, "¡Enhorabuena! Ha acertado todas las películas. ¿Qué desea hacer?", "Fin de partida", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, null, new String[] {"Jugar de nuevo", "Salir"}, null);
@@ -207,20 +229,32 @@ public class PantallaPrincipal extends javax.swing.JFrame {
                 return;
             }
             
+            // Si todavia faltan frases se situa la frase que hay al final
+            // de dicha lista a dónde estaba la última frase jugada.
+            // Esto asegura de que no se van a repetir
             listaEnJuego[indiceActual] = listaEnJuego[indiceFinal];
         }
         
+        // Se escoge una frase aleatoria de la lista y se pone en mayúsculas para facilitar el juego
         indiceActual = (int)(Math.random() * indiceFinal);
         textoOculto = listaEnJuego[indiceActual].toUpperCase();
+        
+        // Se borra la lista de letras introducidas
         letrasIntroducidas = "";
         
-        lblInformacion.setText("Letras: ");
-        lblImagen.setIcon(imgIntentos[0]);
+        // El contador de fallos se pone a 0
         fallos = 0;
         
+        // Se reinician los elemntos visuales para dejarlos listos para el juego nuevo
+        lblInformacion.setText("Letras: ");
+        lblImagen.setIcon(imgIntentos[0]);
         reiniciarCadenaResultado();
     }
     
+    /**
+     * Pone carácteres de subrayado dónde debe haber letras o el signo que pertoque del textoOculto a
+     * la cadenaResultado.
+     */
     private void reiniciarCadenaResultado() {
         cadenaResultado = new StringBuilder(textoOculto.length());
         for(int i = 0; i < textoOculto.length(); ++i) {
@@ -230,6 +264,10 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         actualizarLabelFraseOculta();
     }
     
+    /**
+     * Actualiza el label, que es lo que realmente ve el usuario, al contenido de cadenaResultado.
+     * Para mejorar el aspecto visual situa un espacio entre caracteres.
+     */
     private void actualizarLabelFraseOculta() {
         String nuevaCadena = "";
         int i;
@@ -241,16 +279,24 @@ public class PantallaPrincipal extends javax.swing.JFrame {
         lblFraseOculta.setText(nuevaCadena);
     }
     
+    /**
+     * Aumenta el contador de fallos y actualiza la imagen en consecuencia. Tambien
+     * indica al usuario si ha perdido la partida y la reinicia por completo.
+     */
     private void ocurrioFallo() {
         fallos++;
         if(fallos < 7)
             lblImagen.setIcon(imgIntentos[fallos]);
         if(fallos == 6) {
-            JOptionPane.showMessageDialog(null, "Ha perdido", "Fin del juego", JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(null, "Ha perdido", "Fin de la partida", JOptionPane.ERROR_MESSAGE);
             reiniciarJuego(true);
         }
     }
     
+    /**
+     * Comprueba si ha acertado todas las letras de la frase y en consecuencia informa al usuario.
+     * De igual forma reinicia el juego para que pueda continuar con la siguiente frase.
+     */
     private void comprobarSiGana() {
         if(cadenaResultado.indexOf("_") == -1) {
             JOptionPane.showMessageDialog(null, "Ha ganado", "Fin del juego", JOptionPane.INFORMATION_MESSAGE);
