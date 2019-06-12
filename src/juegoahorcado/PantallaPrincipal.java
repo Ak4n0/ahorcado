@@ -9,7 +9,10 @@ import javax.swing.JOptionPane;
  */
 public class PantallaPrincipal extends javax.swing.JFrame {
     
+    // Contiene las imagenes a mostrar del ahorcado
     ImageIcon[] imgIntentos = new ImageIcon[7];
+    
+    // Lista con todas las frases que se van a usar durante la partida
     String[] titulosPelicula = { "alguien volo sobre el nido del cuco",
                                  "la caza del octubre rojo",
                                  "los diez mandamientos",
